@@ -1,0 +1,93 @@
+import SwiftData
+
+@Model
+class TodoItem {
+    var title: String
+    var isDone: Bool
+    
+    init(title: String, isDone: Bool = false) {
+        self.title = title
+        self.isDone = isDone
+    }
+}
+import SwiftUI
+import SwiftData
+
+struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query private var todoItems: [TodoItem]
+    @State private var newItemTitle = ""
+    
+    var body: some View {
+        NavigationView {
+            VStack {
+                HStack {
+                    TextField("Ny todo-uppgift", text: $newItemTitle)
+                    Button("Lägg till") {
+                        addItem()
+                    }
+                }
+                .padding()
+                
+                List {
+                    ForEach(todoItems) { item in
+                        HStack {
+                            Text(item.title)
+                            Spacer()
+                            Image(systemName: item.isDone ? "checkmark.circle.fill" : "circle")
+                        }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            toggleItemStatus(item)
+                        }
+                    }
+                    .onDelete(perform: deleteItems)
+                }
+            }
+            .navigationTitle("Todo-lista")
+        }
+    }
+    
+    private func addItem() {
+        let newItem = TodoItem(title: newItemTitle)
+        modelContext.insert(newItem)
+        newItemTitle = ""
+    }
+    
+    private func toggleItemStatus(_ item: TodoItem) {
+        item.isDone.toggle()
+    }
+    
+    private func deleteItems(offsets: IndexSet) {
+        for index in offsets {
+            modelContext.delete(todoItems[index])
+        }
+    }
+}
+import SwiftUI
+import SwiftData
+
+@main
+struct TodoApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+        .modelContainer(for: TodoItem.self)
+    }
+}
+import SwiftUI
+import SwiftData
+
+@main
+struct TodoApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+        .modelContainer(for: TodoItem.self)
+    }
+}
+ForEach(todoItems.sorted { !$0.isDone && $1.isDone }) { item in
+    // ... resten av koden är densamma
+}
